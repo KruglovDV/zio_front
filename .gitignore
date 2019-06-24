@@ -1,12 +1,6 @@
-<<<<<<< HEAD
 .bloop
 .metals
 target
 project/project
 project/target
-=======
-.bloop 
-.metals
-target
-project/target/
->>>>>>> dev
+.idea
