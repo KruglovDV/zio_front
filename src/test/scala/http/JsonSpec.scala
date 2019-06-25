@@ -12,13 +12,8 @@ import org.http4s._
 import org.http4s.implicits._
 import org.http4s.dsl.Http4sDsl
 
-<<<<<<< HEAD
-import scalaz.zio.{ZIO, UIO, Ref, DefaultRuntime}
-import scalaz.zio.interop.catz._
-=======
 import zio.{ DefaultRuntime, Ref, UIO, ZIO }
 import zio.interop.catz._
->>>>>>> dev
 
 
 class JsonSpec extends HTTPSpec {
@@ -43,21 +38,14 @@ class JsonSpec extends HTTPSpec {
 
     it("should parse json") {
       
-    val body = json"""
-      {
-        "id"        : 33        ,
-        "url"       :"/testUrl" ,
-        "title"     :"One"      ,
-        "completed" : false     ,
-        "order"     : "None"
-      }"""
+    val body = json"""{"title":"One"}"""
 
     val req = request[TodoTask](Method.POST, "/").withEntity(body)
 
     runWithEnv(
       check(
         app.run(req),
-        Status.Ok,
+        Status.Created,
         Some(Nil))
         //Some(TodoItemWithUri(1L, "/1", "Test", false, None))
     )
