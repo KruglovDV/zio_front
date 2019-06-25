@@ -64,6 +64,7 @@ object JsonSpec extends DefaultRuntime {
       repo      = InMemoryRepository(store, counter)
       env       = new Repository {
                     override val todoRepository: Repository.Service[Any] = repo
+                    override val dbInfoRepository: Repository.SimpleService[Any] = null
                   }
     } yield env
 

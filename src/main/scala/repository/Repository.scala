@@ -1,11 +1,12 @@
 package clover.tsp.front.repository
 
-import clover.tsp.front.{ TodoId, TodoItem, TodoItemPatchForm, TodoItemPostForm }
+import clover.tsp.front.{DBInfo, TodoId, TodoItem, TodoItemPatchForm, TodoItemPostForm}
 import zio._
 
 trait Repository extends Serializable {
 
   val todoRepository: Repository.Service[Any]
+  val dbInfoRepository: Repository.SimpleService[Any]
 
 }
 
@@ -13,7 +14,7 @@ object Repository extends Serializable {
 
   trait Service[R] extends Serializable {
 
-    def getAll(): ZIO[R, Nothing, List[TodoItem]]
+    def getAll: ZIO[R, Nothing, List[TodoItem]]
 
     def getById(id: TodoId): ZIO[R, Nothing, Option[TodoItem]]
 
@@ -27,9 +28,18 @@ object Repository extends Serializable {
 
   }
 
+  trait SimpleService[R] extends Serializable{
+    def get: ZIO[R, Nothing, DBInfo]
+  }
+
+  final case class DBInfoRepository(ref: Ref[DBInfo], counter: Ref[Long]) extends SimpleService[Any] {
+    override def get: ZIO[Any, Nothing, DBInfo] =
+      ref.update(_ => DBInfo("db_source", "db_sink", "PostgreSQL", "SELECT * FROM test_db;"))
+  }
+
   final case class InMemoryRepository(ref: Ref[Map[TodoId, TodoItem]], counter: Ref[Long]) extends Service[Any] {
 
-    override def getAll(): ZIO[Any, Nothing, List[TodoItem]] =
+    override def getAll: ZIO[Any, Nothing, List[TodoItem]] =
       ref.get.map(_.values.toList)
 
     override def getById(id: TodoId): ZIO[Any, Nothing, Option[TodoItem]] =

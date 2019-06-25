@@ -42,3 +42,12 @@ final case class TodoItemPatchForm(
   completed: Option[Boolean] = None,
   order: Option[Int] = None
 )
+
+final case class DBInfo(
+
+  source: String,
+  sink: String,
+  dbType: String,
+  query: String
+
+)
