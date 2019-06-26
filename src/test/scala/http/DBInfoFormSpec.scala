@@ -27,7 +27,13 @@ class DBInfoFormSpec extends HTTPSpec{
 
     it("should retrieve object") {
 
-      val body = json"""{"source": "db_source", "sink": "db_sink", "dbType": "PostgreSQL", "query": "SELECT * FROM test_db;"}"""
+      val body =
+        json"""{
+              "source": "db_source",
+              "sink": "db_sink",
+              "dbType": "PostgreSQL",
+              "query": "SELECT * FROM test_db;"
+              }"""
       val req = request[DBInfoDTO](Method.GET, "/").withEntity(body)
 
       runWithEnv(
