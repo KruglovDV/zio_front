@@ -30,9 +30,11 @@ final case class DBService[R <: Repository](rootUri: String) {
 
       case req @ GET -> Root =>
         log.debug("Root method called")
-        req.decode[DBInfoForm]{ dbInfo =>
-          Ok(simpleRepository.get(dbInfo))
-        }
+        for {
+          dbInfoFrom <- req.as[DBInfoForm]
+          dbInfoItem <- simpleRepository.get(dbInfoFrom)
+          res <- Ok(dbInfoItem)
+        } yield res
     }
 
 }
