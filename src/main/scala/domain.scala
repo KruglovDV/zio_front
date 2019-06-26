@@ -43,11 +43,11 @@ final case class TodoItemPatchForm(
   order: Option[Int] = None
 )
 
-final case class DBInfo(
-
+final case class DBInfoForm(
   source: String,
   sink: String,
   dbType: String,
   query: String
-
 )
+
+final case class DBInfoItem(data: String)

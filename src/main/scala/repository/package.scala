@@ -23,5 +23,6 @@ package object repository extends Repository.Service[Repository] {
 }
 
 package object simpleRepository extends Repository.SimpleService[Repository] {
-  override def get: ZIO[Repository, Nothing, DBInfo] = ZIO.accessM(_.dbInfoRepository.get)
+  override def get(dbInfo: DBInfoForm): ZIO[Repository, Nothing, DBInfoItem] =
+    ZIO.accessM(_.dbInfoRepository.get(dbInfo))
 }
