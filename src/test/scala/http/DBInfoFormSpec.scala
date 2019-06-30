@@ -1,18 +1,19 @@
 package clover.tsp.front.http
 
-import clover.tsp.front.{DBInfoForm, HTTPSpec, DBInfoItem}
+import java.nio.file.Paths
+
+import clover.tsp.front.{DBInfoForm, DBInfoItem, HTTPSpec}
 import clover.tsp.front.repository.Repository
 import clover.tsp.front.repository.Repository.DBInfoRepository
-
 import io.circe.literal._
 import io.circe.generic.auto._
-
 import org.http4s._
 import org.http4s.implicits._
 import org.http4s.dsl.Http4sDsl
-
 import zio.{DefaultRuntime, Ref, UIO, ZIO}
 import zio.interop.catz._
+
+import scala.io.Source
 
 class DBInfoFormSpec extends HTTPSpec{
 
@@ -24,16 +25,16 @@ class DBInfoFormSpec extends HTTPSpec{
   val dsl: Http4sDsl[DBInfoDTO] = Http4sDsl[DBInfoDTO]
 
   describe("DB Service"){
-
     it("should retrieve object") {
 
+      val currentPath = Paths.get(".").toAbsolutePath
+      val filePath = s"$currentPath/assets/json/req0.txt"
+      val buffer = Source.fromFile(filePath)
+      val jsonData = buffer.getLines.mkString
+      buffer.close
+
       val body =
-        json"""{
-              "source": "db_source",
-              "sink": "db_sink",
-              "dbType": "PostgreSQL",
-              "query": "SELECT * FROM test_db;"
-              }"""
+        json"""$jsonData"""
       val req = request[DBInfoDTO](Method.GET, "/").withEntity(body)
 
       runWithEnv(

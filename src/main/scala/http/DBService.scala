@@ -1,6 +1,6 @@
 package clover.tsp.front.http
 
-import clover.tsp.front.{DBInfoForm, simpleRepository}
+import clover.tsp.front.{TSPTask, simpleRepository}
 import clover.tsp.front.repository.Repository
 import io.circe.generic.auto._
 import io.circe.{Decoder, Encoder}
@@ -31,8 +31,8 @@ final case class DBService[R <: Repository](rootUri: String) {
       case req @ GET -> Root =>
         log.debug("Root method called")
         for {
-          dbInfoFrom <- req.as[DBInfoForm]
-          dbInfoItem <- simpleRepository.get(dbInfoFrom)
+          task <- req.as[TSPTask]
+          dbInfoItem <- simpleRepository.get(task)
           res <- Ok(dbInfoItem)
         } yield res
     }

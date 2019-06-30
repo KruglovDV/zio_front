@@ -50,4 +50,56 @@ final case class DBInfoForm(
   query: String
 )
 
+final case class RowSchema(
+  toTsField: String,
+  fromTsField: String,
+  contextField: String,
+  sourceIdField: String,
+  patternIdField: String,
+  forwardedFields: List[String],
+  processingTsField: String,
+  appIdFieldVal: List[String],
+)
+
+final case class Sink(
+  jdbcUrl: String,
+  password: String,
+  userName: String,
+  tableName: String,
+  driverName: String,
+  parallelism: Int,
+  batchInterval: Int,
+  rowSchema: RowSchema,
+)
+
+final case class Source(
+  query: String,
+  jdbcUrl: String,
+  password: String,
+  sourceId: Int,
+  userName: String,
+  driverName: String,
+  parallelism: Int,
+  dateTimeField: String,
+  eventsMaxGapMs: Int,
+  partitionFields: List[String],
+  defaultEventsGapMs: Int,
+  numParallelSources: Int,
+  patternsParallelism: Int,
+)
+
+final case class Rule(
+  id: String,
+  payload: Map[String, String],
+  sourceCode: String,
+  forwardedFields: List[String]
+)
+
+final case class TSPTask(
+  sink: Sink,
+  uuid: String,
+  source: String,
+  patterns: List[Rule],
+)
+
 final case class DBInfoItem(data: String)

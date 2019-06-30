@@ -1,6 +1,6 @@
 package clover.tsp.front.repository
 
-import clover.tsp.front.{DBInfoForm, TodoId, TodoItem, TodoItemPatchForm, TodoItemPostForm, DBInfoItem}
+import clover.tsp.front.{TSPTask, TodoId, TodoItem, TodoItemPatchForm, TodoItemPostForm, DBInfoItem}
 import zio._
 
 trait Repository extends Serializable {
@@ -29,11 +29,11 @@ object Repository extends Serializable {
   }
 
   trait SimpleService[R] extends Serializable {
-    def get(dbInfo: DBInfoForm): ZIO[R, Nothing, DBInfoItem]
+    def get(task: TSPTask): ZIO[R, Nothing, DBInfoItem]
   }
 
   final case class DBInfoRepository(ref: Ref[DBInfoItem], counter: Ref[Long]) extends SimpleService[Any] {
-    override def get(dbInfo: DBInfoForm): ZIO[Any, Nothing, DBInfoItem] =
+    override def get(task: TSPTask): ZIO[Any, Nothing, DBInfoItem] =
       ref.get
   }
 
