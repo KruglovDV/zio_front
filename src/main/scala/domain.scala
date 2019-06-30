@@ -104,8 +104,8 @@ final case class Rule(
 final case class TSPTask(
   sink: Sink,
   uuid: String,
-  source: Source,
-  patterns: List[Rule],
+  // source: Source,
+  // patterns: List[Rule],
 )
 
-final case class DBInfoItem(data: String)
+final case class DBItem(data: String)

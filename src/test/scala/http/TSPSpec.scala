@@ -2,12 +2,11 @@ package clover.tsp.front.http
 
 import java.nio.file.Paths
 
-import clover.tsp.front.{DBInfoForm, DBInfoItem, HTTPSpec, Source => TSPSource, RowSchema, Rule, Sink, TSPTask}
+import clover.tsp.front.{ DBItem, HTTPSpec, RowSchema, Rule, Sink, TSPTask, Source => TSPSource}
 import clover.tsp.front.repository.Repository
 import clover.tsp.front.repository.Repository.DBInfoRepository
 import io.circe.literal._
 import io.circe.generic.auto._
-import io.circe._
 import io.circe.parser._
 import org.http4s._
 import org.http4s.implicits._
@@ -35,41 +34,20 @@ class TSPSpec extends HTTPSpec{
       val jsonData = buffer.mkString
       buffer.close
 
-      var reqBody = ""
-      var expectedBody = None : Option[TSPTask]
+      val expectedBody = Some(DBItem("some data"))
 
       parse(jsonData) match{
         case Left(failure) => println("Invalid JSON :(")
         case Right(json) =>
-          println(s"TSP - запрос распарсен! $json")
-
-          // нужно как-то убирать слэши из строки
-          //reqBody = json.toString()
-//                        .replace("\n", "")
-//                        .replace(" ", "")
-//                        .replace("\\", "")
-
-          // вот это не работает из-за того, что в примере в source.query есть кавычки с \
-          // пока непонятно,как их обрабатывать
-          /*expectedBody = decode[TSPTask](reqBody) match {
-            case Left(failure) =>
-              println(s"Что-то пошло не так: $failure")
-              System.exit(1)
-              None
-            case Right(resp) => Some(resp)
-          }*/
+          val req = request[TSPTaskDTO](Method.GET, "/").withEntity(json"""$json""")
+          runWithEnv(
+            check(
+              app.run(req),
+              Status.Ok,
+              expectedBody
+            )
+          )
       }
-
-      val req = request[TSPTaskDTO](Method.GET, "/").withEntity(reqBody)
-
-//      runWithEnv(
-//        check(
-//          app.run(req),
-//          Status.Ok,
-//          expectedBody
-//        )
-//      )
-
     }
 
   }
@@ -82,12 +60,7 @@ object TSPSpec extends DefaultRuntime{
 
   val mkEnv: UIO[Repository] =
     for {
-       store <- Ref.make(TSPTask(
-         Sink("", "", "", "", "", 1, 1, RowSchema("", "", "", "", "", List(""), "", List(""))),
-         "",
-         TSPSource("", "", "", 1, "", "", 1, "", 1, List(""), 1, 1, 1),
-         List(Rule("", Map("" -> ""), "", List("")))
-       ))
+       store <- Ref.make(DBItem("some data"))
        counter  <- Ref.make(0L)
        repo = DBInfoRepository(store, counter)
        env = new Repository {
