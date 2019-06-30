@@ -101,11 +101,12 @@ final case class Rule(
   forwardedFields: List[String]
 )
 
+@JsonCodec
 final case class TSPTask(
   sink: Sink,
   uuid: String,
-  // source: Source,
-  // patterns: List[Rule],
+  patterns: List[Rule],
+  source: Source
 )
 
 final case class DBItem(data: String)

@@ -48,13 +48,9 @@
    "patterns":[
       {
          "id":"49",
-         "payload":{
-
-         },
+         "payload":{},
          "sourceCode":"PosKM = 0 andThen ((SpeedEngine > 0 for 1 min ) and (PosKM > 4 for 1 min < 30 sec))",
-         "forwardedFields":[
-
-         ]
+         "forwardedFields":[]
       }
    ]
 }
