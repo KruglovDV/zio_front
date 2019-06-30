@@ -29,11 +29,11 @@ object Repository extends Serializable {
   }
 
   trait SimpleService[R] extends Serializable {
-    def get(task: TSPTask): ZIO[R, Nothing, DBInfoItem]
+    def get(task: TSPTask): ZIO[R, Nothing, TSPTask]
   }
 
-  final case class DBInfoRepository(ref: Ref[DBInfoItem], counter: Ref[Long]) extends SimpleService[Any] {
-    override def get(task: TSPTask): ZIO[Any, Nothing, DBInfoItem] =
+  final case class DBInfoRepository(ref: Ref[TSPTask], counter: Ref[Long]) extends SimpleService[Any] {
+    override def get(task: TSPTask): ZIO[Any, Nothing, TSPTask] =
       ref.get
   }
 
