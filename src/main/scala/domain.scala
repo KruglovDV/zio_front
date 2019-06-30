@@ -1,5 +1,7 @@
 package clover.tsp.front
 
+import io.circe.generic.JsonCodec
+
 final case class TodoId(value: Long) extends AnyVal
 
 final case class TodoPayload(
@@ -50,6 +52,7 @@ final case class DBInfoForm(
   query: String
 )
 
+@JsonCodec
 final case class RowSchema(
   toTsField: String,
   fromTsField: String,
@@ -61,6 +64,7 @@ final case class RowSchema(
   appIdFieldVal: List[String],
 )
 
+@JsonCodec
 final case class Sink(
   jdbcUrl: String,
   password: String,
@@ -72,6 +76,7 @@ final case class Sink(
   rowSchema: RowSchema,
 )
 
+@JsonCodec
 final case class Source(
   query: String,
   jdbcUrl: String,
@@ -88,6 +93,7 @@ final case class Source(
   patternsParallelism: Int,
 )
 
+@JsonCodec
 final case class Rule(
   id: String,
   payload: Map[String, String],
@@ -98,7 +104,7 @@ final case class Rule(
 final case class TSPTask(
   sink: Sink,
   uuid: String,
-  source: String,
+  source: Source,
   patterns: List[Rule],
 )
 

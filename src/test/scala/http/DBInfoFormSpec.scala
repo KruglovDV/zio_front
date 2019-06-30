@@ -7,6 +7,8 @@ import clover.tsp.front.repository.Repository
 import clover.tsp.front.repository.Repository.DBInfoRepository
 import io.circe.literal._
 import io.circe.generic.auto._
+import io.circe._
+import io.circe.parser._
 import org.http4s._
 import org.http4s.implicits._
 import org.http4s.dsl.Http4sDsl
@@ -30,8 +32,15 @@ class DBInfoFormSpec extends HTTPSpec{
       val currentPath = Paths.get(".").toAbsolutePath
       val filePath = s"$currentPath/assets/json/req0.txt"
       val buffer = Source.fromFile(filePath)
-      val jsonData = buffer.getLines.mkString
+      val jsonData = buffer.mkString
       buffer.close
+
+      parse(jsonData) match{
+        case Left(failure) => println("Invalid JSON :(")
+        case Right(json) => println(s"TSP - запрос распарсен! $json")
+      }
+
+      /*println(s"PARSE RESULT: $parseResult")
 
       val body =
         json"""$jsonData"""
@@ -43,7 +52,7 @@ class DBInfoFormSpec extends HTTPSpec{
           Status.Ok,
           Some(DBInfoItem("some data"))
         )
-      )
+      )*/
 
     }
 
