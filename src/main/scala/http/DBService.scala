@@ -12,21 +12,18 @@ import zio.TaskR
 import zio.interop.catz._
 
 final case class DBService[R <: Repository](rootUri: String) {
+  type TSPTaskDTO[A] = TaskR[R, A]
 
-  type DBInfoDTO[A] = TaskR[R, A]
+  implicit def tspTaskJsonDecoder[A](implicit decoder: Decoder[A]): EntityDecoder[TSPTaskDTO, A] = jsonOf[TSPTaskDTO, A]
+  implicit def tspTaskJsonEncoder[A](implicit decoder: Encoder[A]): EntityEncoder[TSPTaskDTO, A] = jsonEncoderOf[TSPTaskDTO, A]
 
-  implicit def circeJsonDecoder[A](implicit decoder: Decoder[A]): EntityDecoder[DBInfoDTO, A] = jsonOf[DBInfoDTO, A]
-
-  implicit def circeJsonEncoder[A](implicit encoder: Encoder[A]): EntityEncoder[DBInfoDTO, A] =
-    jsonEncoderOf[DBInfoDTO, A]
-
-  val dsl: Http4sDsl[DBInfoDTO] = Http4sDsl[DBInfoDTO]
+  val dsl: Http4sDsl[TSPTaskDTO] = Http4sDsl[TSPTaskDTO]
   import dsl._
 
   val log = Logger("DBService")
 
-  def service: HttpRoutes[DBInfoDTO] =
-    HttpRoutes.of[DBInfoDTO] {
+  def service: HttpRoutes[TSPTaskDTO] =
+    HttpRoutes.of[TSPTaskDTO] {
 
       case req @ GET -> Root =>
         log.debug("Root method called")

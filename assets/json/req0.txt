@@ -34,7 +34,7 @@
       "userName":"",
       "driverName":"ru.yandex.clickhouse.ClickHouseDriver",
       "parallelism":1,
-      "datetimeField":"ts",
+      "dateTimeField":"ts",
       "eventsMaxGapMs":60000,
       "partitionFields":[
          "loco_num",
