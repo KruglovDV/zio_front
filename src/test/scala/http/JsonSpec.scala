@@ -15,7 +15,6 @@ import org.http4s.dsl.Http4sDsl
 import zio.{ DefaultRuntime, Ref, UIO, ZIO }
 import zio.interop.catz._
 
-
 class JsonSpec extends HTTPSpec {
   import JsonSpec._
   import JsonSpec.todoService._
@@ -28,27 +27,20 @@ class JsonSpec extends HTTPSpec {
   describe("Simple Service") {
 
     it("should create new todo items") {
-      val req     = request(Method.POST, "/").withEntity(TodoItemPostForm("Test"))
-      runWithEnv(
-        check(
-          app.run(req),
-          Status.Created,
-          Some(TodoItemWithUri(1L, "/1", "Test", false, None))))
+      val req = request(Method.POST, "/").withEntity(TodoItemPostForm("Test"))
+      runWithEnv(check(app.run(req), Status.Created, Some(TodoItemWithUri(1L, "/1", "Test", false, None))))
     }
 
     it("should parse json") {
-      
-    val body = json"""{"title":"One"}"""
 
-    val req = request[TodoTask](Method.POST, "/").withEntity(body)
+      val body = json"""{"title":"One"}"""
 
-    runWithEnv(
-      check(
-        app.run(req),
-        Status.Created,
-        Some(Nil))
+      val req = request[TodoTask](Method.POST, "/").withEntity(body)
+
+      runWithEnv(
+        check(app.run(req), Status.Created, Some(Nil))
         //Some(TodoItemWithUri(1L, "/1", "Test", false, None))
-    )
+      )
     }
   }
 }
@@ -59,13 +51,13 @@ object JsonSpec extends DefaultRuntime {
 
   val mkEnv: UIO[Repository] =
     for {
-      store    <- Ref.make(Map[TodoId, TodoItem]())
-      counter  <- Ref.make(0L)
-      repo      = InMemoryRepository(store, counter)
-      env       = new Repository {
-                    override val todoRepository: Repository.Service[Any] = repo
-                    override val dbInfoRepository: Repository.SimpleService[Any] = null
-                  }
+      store   <- Ref.make(Map[TodoId, TodoItem]())
+      counter <- Ref.make(0L)
+      repo    = InMemoryRepository(store, counter)
+      env = new Repository {
+        override val todoRepository: Repository.Service[Any]         = repo
+        override val dbInfoRepository: Repository.SimpleService[Any] = null
+      }
     } yield env
 
   def runWithEnv[E, A](task: ZIO[Repository, E, A]): A =

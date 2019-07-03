@@ -61,7 +61,7 @@ final case class RowSchema(
   patternIdField: String,
   forwardedFields: List[String],
   processingTsField: String,
-  appIdFieldVal: List[String],
+  appIdFieldVal: List[String]
 )
 
 @JsonCodec
@@ -73,7 +73,7 @@ final case class Sink(
   driverName: String,
   parallelism: Int,
   batchInterval: Int,
-  rowSchema: RowSchema,
+  rowSchema: RowSchema
 )
 
 @JsonCodec
@@ -90,7 +90,7 @@ final case class Source(
   partitionFields: List[String],
   defaultEventsGapMs: Int,
   numParallelSources: Int,
-  patternsParallelism: Int,
+  patternsParallelism: Int
 )
 
 @JsonCodec

@@ -2,7 +2,7 @@ package clover.tsp.front.http
 
 import java.nio.file.Paths
 
-import clover.tsp.front.{ DBItem, HTTPSpec, RowSchema, Rule, Sink, TSPTask, Source => TSPSource}
+import clover.tsp.front.{ DBItem, HTTPSpec }
 import clover.tsp.front.repository.Repository
 import clover.tsp.front.repository.Repository.DBInfoRepository
 import io.circe.literal._
@@ -11,12 +11,12 @@ import io.circe.parser._
 import org.http4s._
 import org.http4s.implicits._
 import org.http4s.dsl.Http4sDsl
-import zio.{DefaultRuntime, Ref, UIO, ZIO}
+import zio.{ DefaultRuntime, Ref, UIO, ZIO }
 import zio.interop.catz._
 
 import scala.io.Source
 
-class TSPSpec extends HTTPSpec{
+class TSPSpec extends HTTPSpec {
 
   import TSPSpec._
   import TSPSpec.dbInfoService._
@@ -25,19 +25,19 @@ class TSPSpec extends HTTPSpec{
 
   val dsl: Http4sDsl[TSPTaskDTO] = Http4sDsl[TSPTaskDTO]
 
-  describe("DB Service"){
+  describe("DB Service") {
     it("should retrieve object") {
 
       val currentPath = Paths.get(".").toAbsolutePath
-      val filePath = s"$currentPath/assets/json/req0.txt"
-      val buffer = Source.fromFile(filePath)
-      val jsonData = buffer.mkString
+      val filePath    = s"$currentPath/assets/json/req0.txt"
+      val buffer      = Source.fromFile(filePath)
+      val jsonData    = buffer.mkString
       buffer.close
 
       val expectedBody = Some(DBItem("some data"))
 
-      parse(jsonData) match{
-        case Left(failure) => println("Invalid JSON :(")
+      parse(jsonData) match {
+        case Left(_) => println("Invalid JSON :(")
         case Right(json) =>
           val req = request[TSPTaskDTO](Method.GET, "/").withEntity(json"""$json""")
           runWithEnv(
@@ -54,19 +54,19 @@ class TSPSpec extends HTTPSpec{
 
 }
 
-object TSPSpec extends DefaultRuntime{
+object TSPSpec extends DefaultRuntime {
 
   val dbInfoService: DBService[Repository] = DBService[Repository]("")
 
   val mkEnv: UIO[Repository] =
     for {
-       store <- Ref.make(DBItem("some data"))
-       counter  <- Ref.make(0L)
-       repo = DBInfoRepository(store, counter)
-       env = new Repository {
-         override val dbInfoRepository: Repository.SimpleService[Any] = repo
-         override val todoRepository: Repository.Service[Any] = null
-       }
+      store   <- Ref.make(DBItem("some data"))
+      counter <- Ref.make(0L)
+      repo    = DBInfoRepository(store, counter)
+      env = new Repository {
+        override val dbInfoRepository: Repository.SimpleService[Any] = repo
+        override val todoRepository: Repository.Service[Any]         = null
+      }
     } yield env
 
   def runWithEnv[E, A](task: ZIO[Repository, E, A]): A =

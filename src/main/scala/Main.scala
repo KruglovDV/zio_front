@@ -2,7 +2,7 @@ package clover.tsp.front
 
 import cats.effect._
 import clover.tsp.front.config._
-import clover.tsp.front.http.{Service, DBService}
+import clover.tsp.front.http.{ DBService, Service }
 import clover.tsp.front.repository._
 import org.http4s.implicits._
 import org.http4s.server.Router
@@ -26,12 +26,12 @@ object Main extends App {
       cfg <- ZIO.fromEither(pureconfig.loadConfig[Config])
       _   <- initDb(cfg.dbConfig)
 
-      blockingEC  <- ZIO.environment[Blocking].flatMap(_.blocking.blockingExecutor).map(_.asEC)      
-      block = Blocker.liftExecutionContext(blockingEC)
+      blockingEC  <- ZIO.environment[Blocking].flatMap(_.blocking.blockingExecutor).map(_.asEC)
+      block       = Blocker.liftExecutionContext(blockingEC)
       transactorR = mkTransactor(cfg.dbConfig, Platform.executor.asEC, block)
 
       httpApp = Router[AppTask](
-        "/todos" -> Service(s"${cfg.appConfig.baseUrl}/todos").service,
+        "/todos"   -> Service(s"${cfg.appConfig.baseUrl}/todos").service,
         "/db_info" -> DBService(s"${cfg.appConfig.baseUrl}/db_info").service
       ).orNotFound
       server = ZIO.runtime[AppEnvironment].flatMap { implicit rts =>
