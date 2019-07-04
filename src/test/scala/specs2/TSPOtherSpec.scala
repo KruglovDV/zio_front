@@ -1,13 +1,12 @@
-/*package clover.tsp.front.specs2
+package clover.tsp.front.specs2
 
 import java.nio.file.Paths
 
 import cats.data.OptionT
-import clover.tsp.front.{DBItem, HTTPSpec}
+import clover.tsp.front.{DBItem, HTTPSpec2}
 import clover.tsp.front.http.DBService
 import clover.tsp.front.repository.Repository
 import clover.tsp.front.repository.Repository.DBInfoRepository
-import clover.tsp.front.specs2.TSPSpec.dbInfoService
 import io.circe.literal._
 import io.circe.generic.auto._
 import io.circe.parser._
@@ -17,9 +16,24 @@ import zio.{DefaultRuntime, Ref, Task, UIO, ZIO}
 import org.specs2._
 import org.specs2.specification.core.SpecStructure
 
+import clover.tsp.front.{ DBItem, HTTPSpec }
+import clover.tsp.front.repository.Repository
+import clover.tsp.front.repository.Repository.DBInfoRepository
+import org.http4s._
+import org.http4s.implicits._
+import org.http4s.dsl.Http4sDsl
+import zio.{ DefaultRuntime, Ref, UIO, ZIO }
+import zio.interop.catz._
+import zio.{ DefaultRuntime }
+
 import scala.io.Source
 
-class TSPOtherSpec extends Specification with DefaultRuntime with HTTPSpec {
+import scala.io.Source
+
+class TSPOtherSpec extends HTTPSpec2 {
+  import TSPOtherSpec._
+  import TSPOtherSpec.dbInfoService._
+
   override def is: SpecStructure =
     s2"""
 
@@ -30,12 +44,7 @@ class TSPOtherSpec extends Specification with DefaultRuntime with HTTPSpec {
 
   def t1 = {
 
-
-
-    import TSPSpec._
-    import TSPSpec.dbInfoService._
-
-    val app = dbInfoService.service
+    val app = dbInfoService.service.orNotFound
 
     val dsl: Http4sDsl[TSPTaskDTO] = Http4sDsl[TSPTaskDTO]
 
@@ -51,11 +60,6 @@ class TSPOtherSpec extends Specification with DefaultRuntime with HTTPSpec {
       case Left(_) => println("Invalid JSON :(")
       case Right(json) =>
         val req = request[TSPTaskDTO](Method.GET, "/").withEntity(json"""$json""")
-        val anotherReq = Request(Method.GET).withEntity(json"""$json""")
-
-        val responseTask: OptionT[dbInfoService.TSPTaskDTO, Response[dbInfoService.TSPTaskDTO]] = app.run(anotherReq)
-
-        responseTask.run
 
         runWithEnv(
           check(
@@ -72,7 +76,7 @@ class TSPOtherSpec extends Specification with DefaultRuntime with HTTPSpec {
 
 }
 
-object TSPSpec extends DefaultRuntime {
+object TSPOtherSpec extends DefaultRuntime {
 
   val dbInfoService: DBService[Repository] = DBService[Repository]("")
 
@@ -90,4 +94,4 @@ object TSPSpec extends DefaultRuntime {
   def runWithEnv[E, A](task: ZIO[Repository, E, A]): A =
     unsafeRun[E, A](mkEnv.flatMap(env => task.provide(env)))
 
-}*/
+}

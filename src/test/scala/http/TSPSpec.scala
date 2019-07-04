@@ -13,6 +13,7 @@ import org.http4s.implicits._
 import org.http4s.dsl.Http4sDsl
 import zio.{ DefaultRuntime, Ref, UIO, ZIO }
 import zio.interop.catz._
+import zio.{ DefaultRuntime }
 
 import scala.io.Source
 
