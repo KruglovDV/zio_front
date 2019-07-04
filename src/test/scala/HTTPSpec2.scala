@@ -23,9 +23,9 @@ trait HTTPSpec2 extends Specification {
                               ): F[Unit] =
     for {
       actual <- actual
-      _ <- expectedBody.fold(actual.body.compile.toVector.map(s => assert(s.isEmpty)))(
-        expected => actual.as[A].map(x => assert(x === expectedBody, s"Body was $x instead of $expected."))
+      _ <- expectedBody.fold(actual.body.compile.toVector.map(s => s.isEmpty))(
+        expected => actual.as[A].map(x => x === expectedBody)
       )
-      _ <- F.delay(assert(actual.status == expectedStatus, s"Status was ${actual.status} instead of $expectedStatus."))
+      _ <- F.delay(actual.status must_== expectedStatus)
     } yield ()
 }
