@@ -34,5 +34,4 @@ final case class DBService[R <: Repository](rootUri: String) {
           res        <- Ok(dbInfoItem)
         } yield res
     }
-
 }

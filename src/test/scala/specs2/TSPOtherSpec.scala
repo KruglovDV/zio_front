@@ -54,7 +54,7 @@ class TSPOtherSpec extends HTTPSpec2 {
     val jsonData    = buffer.mkString
     buffer.close
 
-    val expectedBody = Some(DBItem("some data"))
+    val expectedBody = Some(DBItem("some data ?"))
 
     parse(jsonData) match {
       case Left(_) => println("Invalid JSON :(")
