@@ -25,6 +25,15 @@ import org.http4s.dsl.Http4sDsl
 import zio.{ DefaultRuntime, Ref, UIO, ZIO }
 import zio.interop.catz._
 import zio.{ DefaultRuntime }
+import cats.effect.Sync
+import cats.implicits._
+import org.http4s.{ EntityDecoder, Method, Request, Response, Status, Uri }
+import cats.effect.Sync
+import cats.implicits._
+import org.http4s._
+import org.scalatest.Assertion
+import org.specs2._
+
 
 import scala.io.Source
 
@@ -54,24 +63,19 @@ class TSPOtherSpec extends HTTPSpec2 {
     val jsonData    = buffer.mkString
     buffer.close
 
-    val expectedBody = Some(DBItem("some data ?"))
+    val expectedBody = Some(DBItem("some data"))
 
     parse(jsonData) match {
-      case Left(_) => println("Invalid JSON :(")
+      case Left(_) => {
+        println("Invalid JSON :(")
+        true must_== false
+      }
       case Right(json) =>
         val req = request[TSPTaskDTO](Method.GET, "/").withEntity(json"""$json""")
-
-        runWithEnv(
-          check(
-            app.run(req),
-            Status.Ok,
-            expectedBody
-          )
-        )
+        val res = runWithEnv(app.run(req))
+        res.as[DBItem] must_== expectedBody
+        res.status must_== Status.Ok
     }
-
-    true must_== true
-
   }
 
 }
