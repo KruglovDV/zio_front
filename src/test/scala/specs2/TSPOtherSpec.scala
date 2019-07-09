@@ -15,28 +15,26 @@ import org.http4s.dsl.Http4sDsl
 import zio.{DefaultRuntime, Ref, Task, UIO, ZIO}
 import org.specs2._
 import org.specs2.specification.core.SpecStructure
-
-import clover.tsp.front.{ DBItem, HTTPSpec }
+import clover.tsp.front.{DBItem, HTTPSpec}
 import clover.tsp.front.repository.Repository
 import clover.tsp.front.repository.Repository.DBInfoRepository
 import org.http4s._
 import org.http4s.implicits._
 import org.http4s.dsl.Http4sDsl
-import zio.{ DefaultRuntime, Ref, UIO, ZIO }
+import zio.{DefaultRuntime, Ref, UIO, ZIO}
 import zio.interop.catz._
-import zio.{ DefaultRuntime }
+import zio.DefaultRuntime
 import cats.effect.Sync
 import cats.implicits._
-import org.http4s.{ EntityDecoder, Method, Request, Response, Status, Uri }
+import org.http4s.{EntityDecoder, Method, Request, Response, Status, Uri}
 import cats.effect.Sync
 import cats.implicits._
 import org.http4s._
 import org.scalatest.Assertion
 import org.specs2._
-
+import org.specs2.matcher.MatchResult
 
 import scala.io.Source
-
 import scala.io.Source
 
 class TSPOtherSpec extends HTTPSpec2 {
@@ -63,19 +61,28 @@ class TSPOtherSpec extends HTTPSpec2 {
     val jsonData    = buffer.mkString
     buffer.close
 
-    val expectedBody = Some(DBItem("some data"))
+   // val expectedBody = Some(DBItem("some data"))
+   //  var cond: MatchResult[Any] = null
 
     parse(jsonData) match {
       case Left(_) => {
         println("Invalid JSON :(")
         true must_== false
       }
-      case Right(json) =>
+      case Right(json) => {
         val req = request[TSPTaskDTO](Method.GET, "/").withEntity(json"""$json""")
         val res = runWithEnv(app.run(req))
-        res.as[DBItem] must_== expectedBody
+        // var cond: MatchResult[Any] = null
+
+
+//        res.as[DBItem].map(x => {
+//          cond = x must_== expectedBody.get
+//        })
+
         res.status must_== Status.Ok
+      }
     }
+    // cond
   }
 
 }
