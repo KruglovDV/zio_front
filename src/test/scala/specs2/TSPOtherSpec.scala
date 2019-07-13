@@ -4,26 +4,22 @@ import java.nio.file.Paths
 
 import clover.tsp.front.http.DBService
 import io.circe.literal._
-import io.circe.generic.auto._
 import io.circe.parser._
 import org.specs2.specification.core.SpecStructure
 import clover.tsp.front.{DBItem, HTTPSpec2}
 import clover.tsp.front.repository.Repository
 import clover.tsp.front.repository.Repository.DBInfoRepository
-import org.http4s._
 import org.http4s.implicits._
 import org.http4s.dsl.Http4sDsl
 import zio.{Ref, Task, UIO, ZIO}
 import zio.interop.catz._
 import zio.DefaultRuntime
 import org.http4s.{Method, Status}
+import io.circe.syntax._
 
 import scala.io.Source
 import java.io.{File, FileInputStream}
 import java.nio.charset.StandardCharsets
-
-import io.circe.{Decoder, Encoder}
-import org.http4s.circe.{jsonEncoderOf, jsonOf}
 
 
 class TSPOtherSpec extends HTTPSpec2 {
@@ -90,7 +86,7 @@ class TSPOtherSpec extends HTTPSpec2 {
         // Parse input data
         // parseResult <- ZIO.effect(parse(jsonData)).either
         parseResult <- ZIO.effect(parse(jsonData)).mapError(_ => new Throwable("JSON parse failed"))
-        json        = parseResult.fold(_ => false, res => res)
+        json        = parseResult.fold(_ => "left", res => res.toString)
         req         = request[TSPTaskDTO](Method.GET, "/").withEntity(json"""$json""")
         // Run HTTP effect
         res    <- ZIO.effect(app.run(req)).mapError(_ => new Throwable("HTTP effect failed"))
