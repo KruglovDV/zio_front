@@ -5,7 +5,6 @@ import cats.implicits._
 import org.http4s.{ EntityDecoder, Method, Request, Response, Status, Uri }
 import org.scalatest.Assertion
 
-
 class HTTPSpec extends UnitSpec {
 
   protected def request[F[_]](method: Method, uri: String): Request[F] =

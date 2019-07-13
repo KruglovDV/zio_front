@@ -2,67 +2,60 @@ package clover.tsp.front.specs2
 
 import java.nio.file.Paths
 
-import cats.data.OptionT
-import clover.tsp.front.{DBItem, HTTPSpec2}
 import clover.tsp.front.http.DBService
-import clover.tsp.front.repository.Repository
-import clover.tsp.front.repository.Repository.DBInfoRepository
 import io.circe.literal._
 import io.circe.generic.auto._
 import io.circe.parser._
-import org.http4s.{Method, Request, Response, Status}
-import org.http4s.dsl.Http4sDsl
-import zio.{DefaultRuntime, Ref, Task, UIO, ZIO}
-import org.specs2._
 import org.specs2.specification.core.SpecStructure
-import clover.tsp.front.{DBItem, HTTPSpec}
+import clover.tsp.front.{ DBItem, HTTPSpec2 }
 import clover.tsp.front.repository.Repository
 import clover.tsp.front.repository.Repository.DBInfoRepository
 import org.http4s._
 import org.http4s.implicits._
 import org.http4s.dsl.Http4sDsl
-import zio.{DefaultRuntime, Ref, UIO, ZIO}
+import zio.{Ref, UIO, ZIO, Task }
 import zio.interop.catz._
 import zio.DefaultRuntime
-import cats.effect.Sync
-import cats.implicits._
-import org.http4s.{EntityDecoder, Method, Request, Response, Status, Uri}
-import cats.effect.Sync
-import cats.implicits._
-import org.http4s._
-import org.scalatest.Assertion
-import org.specs2._
-import org.specs2.matcher.MatchResult
+import org.http4s.{ Method, Status}
+import scala.io.Source
 
-import scala.io.Source
-import scala.io.Source
+import java.io.{ File, FileInputStream }
+import java.nio.charset.StandardCharsets
+
 
 class TSPOtherSpec extends HTTPSpec2 {
   import TSPOtherSpec._
   import TSPOtherSpec.dbInfoService._
 
+  val app                        = dbInfoService.service.orNotFound
+  val dsl: Http4sDsl[TSPTaskDTO] = Http4sDsl[TSPTaskDTO]
+
+  val currentPath = Paths.get(".").toAbsolutePath
+  val filePath    = s"$currentPath/assets/json/req0.txt"
+
   override def is: SpecStructure =
     s2"""
-
         TSP REST Service should
-             retrieve info about DB           $t1
-
+          retrieve info about DB
+          retrieve info about DB improved     $t2
       """
+
+  def closeStream(is: FileInputStream) = UIO(is.close())
+
+  def readAll(fis: FileInputStream, len: Long): Array[Byte] = {
+    val content: Array[Byte] = Array.ofDim(len.toInt)
+    fis.read(content)
+    content
+  }
+
+  def convertBytes(is: FileInputStream, len: Long): Task[String] =
+    Task.effect(new String(readAll(is, len), StandardCharsets.UTF_8))
 
   def t1 = {
 
-    val app = dbInfoService.service.orNotFound
-
-    val dsl: Http4sDsl[TSPTaskDTO] = Http4sDsl[TSPTaskDTO]
-
-    val currentPath = Paths.get(".").toAbsolutePath
-    val filePath    = s"$currentPath/assets/json/req0.txt"
-    val buffer      = Source.fromFile(filePath)
-    val jsonData    = buffer.mkString
+    val buffer   = Source.fromFile(filePath)
+    val jsonData = buffer.mkString
     buffer.close
-
-   // val expectedBody = Some(DBItem("some data"))
-   //  var cond: MatchResult[Any] = null
 
     parse(jsonData) match {
       case Left(_) => {
@@ -72,19 +65,35 @@ class TSPOtherSpec extends HTTPSpec2 {
       case Right(json) => {
         val req = request[TSPTaskDTO](Method.GET, "/").withEntity(json"""$json""")
         val res = runWithEnv(app.run(req))
-        // var cond: MatchResult[Any] = null
-
-
-//        res.as[DBItem].map(x => {
-//          cond = x must_== expectedBody.get
-//        })
 
         res.status must_== Status.Ok
       }
     }
-    // cond
   }
 
+  def t2 =
+    unsafeRun(
+      for {
+
+        file <- Task(new File(filePath))
+        len = file.length
+
+        buffer   <- ZIO.effect(Source.fromFile(filePath)).mapError(_ => new Throwable("Fail to open the file"))
+        //jsonData = Task(new FileInputStream(file)).bracket(closeStream)(convertBytes(_, len))
+        jsonData = buffer.toString
+        _        <- ZIO.effect(buffer.close).mapError(_ => new Throwable("Fail to close the file"))
+
+        // Parse input data
+        // parseResult <- ZIO.effect(parse(jsonData)).either
+        parseResult <- ZIO.effect(parse(jsonData)).mapError(_ => new Throwable("JSON parse failed"))
+        req         = request[TSPTaskDTO](Method.GET, "/").withEntity(json"""$parseResult""")
+
+        // Run HTTP effect
+        res    <- ZIO.effect(app.run(req)).mapError(_ => new Throwable("HTTP effect failed"))
+        status = res.map(_.status)
+
+      } yield status must_== Status.Ok
+    )
 }
 
 object TSPOtherSpec extends DefaultRuntime {

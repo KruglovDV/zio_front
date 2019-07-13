@@ -1,16 +1,16 @@
 val Http4sVersion     = "0.21.0-SNAPSHOT"
-val CirceVersion      = "0.12.0-M3"
+val CirceVersion      = "0.12.0-M4"
 val LogbackVersion    = "1.2.3"
 val ScalaLogVersion   = "3.9.2"
 val PureConfigVersion = "0.11.1"
-val ZioVersion        = "1.0.0-RC8-6"
+val ZioVersion        = "1.0.0-RC9-4"
+val ZioCatsVersion    = "1.3.1.0-RC3"
 val ScalaTestVersion  = "3.0.8"
 val DoobieVersion     = "0.8.0-M1"
 val H2Version         = "1.4.199"
 val FlywayVersion     = "5.2.4"
 val Specs2Version     = "4.6.0"
 val ParadiseVersion   = "2.1.1"
-val CoverageVersion   = "1.6.0" 
 
 val KindProjVersion         = "0.9.10"
 val BetterMonadicForVersion = "0.3.0"
@@ -25,13 +25,13 @@ lazy val root = (project in file("."))
     maxErrors := 3,
     updateOptions := updateOptions.value.withLatestSnapshots(false),
     libraryDependencies ++= Seq(
-      "org.http4s" %% "http4s-blaze-server" % Http4sVersion,
-      "org.http4s" %% "http4s-blaze-client" % Http4sVersion,
-      "org.http4s" %% "http4s-circe"        % Http4sVersion,
-      "org.http4s" %% "http4s-dsl"          % Http4sVersion,
-      "io.circe"   %% "circe-generic"       % CirceVersion,
-      "io.circe"   %% "circe-literal"       % CirceVersion,
-      "io.circe"   %% "circe-parser"        % CirceVersion,
+      "org.http4s"                 %% "http4s-blaze-server"    % Http4sVersion,
+      "org.http4s"                 %% "http4s-blaze-client"    % Http4sVersion,
+      "org.http4s"                 %% "http4s-circe"           % Http4sVersion,
+      "org.http4s"                 %% "http4s-dsl"             % Http4sVersion,
+      "io.circe"                   %% "circe-generic"          % CirceVersion,
+      "io.circe"                   %% "circe-literal"          % CirceVersion,
+      "io.circe"                   %% "circe-parser"           % CirceVersion,
       "org.tpolecat"               %% "doobie-core"            % DoobieVersion,
       "org.tpolecat"               %% "doobie-h2"              % DoobieVersion,
       "org.tpolecat"               %% "doobie-hikari"          % DoobieVersion,
@@ -44,8 +44,8 @@ lazy val root = (project in file("."))
       "com.github.pureconfig"      %% "pureconfig"             % PureConfigVersion,
       "com.github.pureconfig"      %% "pureconfig-cats-effect" % PureConfigVersion,
       "dev.zio"                    %% "zio"                    % ZioVersion,
-      "dev.zio"                    %% "zio-interop-cats"       % ZioVersion,
-      "org.specs2"                 %% "specs2-core"            % Specs2Version % Test  
+      "dev.zio"                    %% "zio-interop-cats"       % ZioCatsVersion,
+      "org.specs2"                 %% "specs2-core"            % Specs2Version % Test
     )
   )
 
@@ -83,8 +83,6 @@ scalacOptions := Seq(
 )
 
 addCompilerPlugin("org.scalamacros" % "paradise" % ParadiseVersion cross CrossVersion.full)
-
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % CoverageVersion)
 
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
