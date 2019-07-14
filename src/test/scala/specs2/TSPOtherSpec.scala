@@ -14,19 +14,16 @@ import org.http4s.dsl.Http4sDsl
 import zio.{Ref, Task, UIO, ZIO}
 import zio.interop.catz._
 import zio.DefaultRuntime
-import org.http4s.{EntityDecoder, Method, Request, Status}
 import io.circe.syntax._
 import cats.syntax.either._
-import io.circe.generic.auto._, io.circe.syntax._
+import io.circe.generic.auto._
 
 import scala.io.Source
 import java.io.{File, FileInputStream}
 import java.nio.charset.StandardCharsets
 
-import io.circe.{Decoder, Json}
-import cats.effect.Sync
-import cats.implicits._
-import org.http4s.{ EntityDecoder, Method, Request, Response, Status, Uri }
+import io.circe.{Json}
+import org.http4s.{ Method, Status }
 
 
 class TSPOtherSpec extends HTTPSpec2 {
@@ -42,8 +39,9 @@ class TSPOtherSpec extends HTTPSpec2 {
   override def is: SpecStructure =
     s2"""
         TSP REST Service should
-          retrieve info about DB              $t1
-          status should be Ok                 $t2
+          retrieve info about DB                 $t1
+          status should be Ok                    $t2
+          retrieve info about DB with status OK  $t3
       """
 
   def closeStream(is: FileInputStream) = UIO(is.close())
@@ -85,23 +83,32 @@ class TSPOtherSpec extends HTTPSpec2 {
     runWithEnv(
       for {
 
-        file <- Task(new File(filePath))
-        len = file.length
-
         buffer   <- ZIO.effect(Source.fromFile(filePath)).mapError(_ => new Throwable("Fail to open the file"))
         //jsonData = Task(new FileInputStream(file)).bracket(closeStream)(convertBytes(_, len))
         jsonData = buffer.mkString
         _        <- ZIO.effect(buffer.close).mapError(_ => new Throwable("Fail to close the file"))
-
-        // Parse input data
-        // parseResult <- ZIO.effect(parse(jsonData)).either
         parseResult <- ZIO.effect(parse(jsonData).getOrElse(Json.Null)).mapError(_ => new Throwable("JSON parse failed"))
         req         = request[TSPTaskDTO](Method.POST, "/").withEntity(json"""$parseResult""")
-        // Run HTTP effect
         res    <- ZIO.effect(app.run(req)).mapError(_ => new Throwable("HTTP effect failed"))
         response <- res
         status = response.status
       } yield status === Status.Ok
+    )
+
+  def t3 =
+    runWithEnv(
+      for {
+        file <- Task(new File(filePath))
+        len = file.length
+        jsonData <- Task(new FileInputStream(file)).bracket(closeStream)(convertBytes(_, len))
+        finalJson = jsonData
+        parseResult <- ZIO.effect(parse(finalJson).getOrElse(Json.Null)).mapError(_ => new Throwable("JSON parse failed"))
+        req  = request[TSPTaskDTO](Method.POST, "/").withEntity(json"""$parseResult""")
+        res    <- ZIO.effect(app.run(req)).mapError(_ => new Throwable("HTTP effect failed"))
+        response <- res
+        responseBody <- response.as[DBItem]
+        status = response.status
+      } yield (responseBody, status).equals((DBItem("some data"), Status.Ok))
     )
 }
 
