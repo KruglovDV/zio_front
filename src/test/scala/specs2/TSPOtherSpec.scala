@@ -74,7 +74,7 @@ class TSPOtherSpec extends HTTPSpec2 {
 
 
   def t2 =
-    unsafeRun(
+    runWithEnv(
       for {
 
         file <- Task(new File(filePath))
@@ -91,8 +91,8 @@ class TSPOtherSpec extends HTTPSpec2 {
         json        = parseResult.fold(_ => "left", res => res.toString)
         req         = request[TSPTaskDTO](Method.GET, "/").withEntity(json"""$json""")
         // Run HTTP effect
-        res    <- ZIO.effect(app.run(req.asInstanceOf[Request[TSPTaskDTO]])).mapError(_ => new Throwable("HTTP effect failed"))
-        status = res.map(_.status)
+        res    <- ZIO.effect(app.run(req)).mapError(_ => new Throwable("HTTP effect failed"))
+        status <- res.map(_.status)
       } yield status must_== Status.Ok
     )
 }
