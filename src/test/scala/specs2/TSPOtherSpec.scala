@@ -16,11 +16,13 @@ import zio.interop.catz._
 import zio.DefaultRuntime
 import org.http4s.{Method, Request, Status}
 import io.circe.syntax._
+import cats.syntax.either._
 
 import scala.io.Source
 import java.io.{File, FileInputStream}
 import java.nio.charset.StandardCharsets
 
+import io.circe.Json
 import zio.Exit.{Failure, Success}
 
 
@@ -37,7 +39,7 @@ class TSPOtherSpec extends HTTPSpec2 {
   override def is: SpecStructure =
     s2"""
         TSP REST Service should
-          retrieve info about DB              $t1
+          retrieve info about DB
           retrieve info about DB improved     $t2
       """
 
@@ -87,13 +89,13 @@ class TSPOtherSpec extends HTTPSpec2 {
 
         // Parse input data
         // parseResult <- ZIO.effect(parse(jsonData)).either
-        parseResult <- ZIO.effect(parse(jsonData)).mapError(_ => new Throwable("JSON parse failed"))
-        json        = parseResult.fold(_ => "left", res => res.toString)
-        req         = request[TSPTaskDTO](Method.GET, "/").withEntity(json"""$json""")
+        parseResult <- ZIO.effect(parse(jsonData).getOrElse(Json.Null)).mapError(_ => new Throwable("JSON parse failed"))
+        req         = request[TSPTaskDTO](Method.POST, "/").withEntity(json"""$parseResult""")
         // Run HTTP effect
         res    <- ZIO.effect(app.run(req)).mapError(_ => new Throwable("HTTP effect failed"))
-        status <- res.map(_.status)
-      } yield status must_== Status.Ok
+        response <- res
+        status = response.status
+      } yield status === Status.Ok
     )
 }
 

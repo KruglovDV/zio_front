@@ -26,7 +26,7 @@ final case class DBService[R <: Repository](rootUri: String) {
   def service: HttpRoutes[TSPTaskDTO] =
     HttpRoutes.of[TSPTaskDTO] {
 
-      case req @ GET -> Root =>
+      case req @ POST -> Root =>
         log.debug("Root method called")
         for {
           task       <- req.as[TSPTask]
