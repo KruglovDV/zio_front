@@ -92,7 +92,7 @@ class TSPOtherSpec extends HTTPSpec2 {
       for {
         file <- Task(new File(filePath))
         len = file.length
-        jsonData <- Task(new FileInputStream(file)).bracket(closeStream)(convertBytes(_, len))
+        jsonData <- Task(new FileInputStream(file)).bracket(closeStream)(convertBytes(_, len)).mapError(_ => new Throwable("Error when working with file"))
         finalJson = jsonData
         parseResult <- ZIO.effect(parse(finalJson).getOrElse(Json.Null)).mapError(_ => new Throwable("JSON parse failed"))
         req  = request[TSPTaskDTO](Method.POST, "/").withEntity(json"""$parseResult""")
